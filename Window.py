@@ -1,4 +1,5 @@
 import tkinter
+import ImageFunctions as IFun
 from tkinter import messagebox
 from tkinter import filedialog
 from PIL import Image
@@ -19,6 +20,7 @@ def selectImage():
         return
 
     print("Successfully loaded image: {0}".format(path))
+    IFun.trimEmptyBorders(image)
 
 select_file_button = tkinter.Button(window, text = "Select image...", command = selectImage)
 select_file_button.place(x = 400, y = 300)
