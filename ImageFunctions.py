@@ -1,13 +1,82 @@
+import math
 from PIL import Image, ImageOps
 
-def splitImage(image, rows_cols):
-    desired_rows, desired_cols = rows_cols
+class Error(Exception):
+    pass
+
+class TooManyPartsError(Error):
+    pass
+
+def splitImage(image, prefix, desired_cols):
+    # We are only given desired_cols, as we will calculate the desired_rows based on the aspect ratio.
+    image = trimEmptyBorders(image)
+    im_width, im_height = image.size
+    print("Image has width = {0}, and height = {1}".format(im_width, im_height))
+    part_width = int(im_width // desired_cols)
+    print("Each part has width = {0}".format(part_width))
+    new_im_width = part_width * desired_cols
+    print("The new im_width = {0}".format(new_im_width))
+    reduce_ratio = im_width / new_im_width
+    new_im_height = round(im_height / reduce_ratio)
+    print("The new im_height = {0}".format(new_im_height))
+    desired_rows = math.ceil(new_im_height / part_width)
+    newer_im_height = part_width * desired_rows
+    print("The even newer im_height = {0}".format(newer_im_height))
+
+    # Because Discord only allows 50 emotes per server, limit parts <= 50
+    if desired_cols * desired_rows > 50:
+        raise TooManyPartsError
+
+    print ("A?")
+    image = image.resize((new_im_width, new_im_height))
+    new_size = (new_im_width, newer_im_height)
+    blank = (0, 0, 0, 0)
+    new_canvas = Image.new("RGBA", new_size, blank)
+    new_canvas.paste(image)
+
+    emote_string = ""
+
+    # Begin the crops / splits
+    for y in range(desired_rows):
+        for x in range(desired_cols):
+            left = x * part_width
+            top = y * part_width
+            right = left + part_width
+            bot = top + part_width
+
+            part = new_canvas.crop((left, top, right, bot))
+            
+            if x == 0:
+                suffix_row = "A"
+            elif x == 1:
+                suffix_row = "B"
+            elif x == 2:
+                suffix_row = "C"
+            elif x == 3:
+                suffix_row = "D"
+            elif x == 4:
+                suffix_row = "E"
+            elif x == 5:
+                suffix_row = "F"
+            elif x == 6:
+                suffix_row = "G"
+            elif x == 7:
+                suffix_row = "H"
+            elif x == 8:
+                suffix_row = "I"
+            else:
+                suffix_row = "RAN_OUT_ROW"
+
+            suffix_col = str(y + 1)
+            emote_string += ":{0}_{1}{2}:".format(prefix, suffix_row, suffix_col)
+            part.save("{0}_{1}{2}.png".format(prefix, suffix_row, suffix_col), "PNG")
+        
+        emote_string += "\n"
+    
+    print(emote_string)
+    return emote_string
 
 def trimEmptyBorders(image):
-    # Only PNG has transparency
-    if image.format != "PNG":
-        return
-        
     image = image.convert("RGBA")
     width, height = image.size
     desired_left_x = 0
@@ -41,4 +110,4 @@ def trimEmptyBorders(image):
                 break
 
     trimmed = image.crop((desired_left_x, desired_top_y, desired_right_x + 1, desired_bot_y + 1))
-    trimmed.save("test_trimmed.png", "PNG")
+    return trimmed
