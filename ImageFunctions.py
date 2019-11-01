@@ -27,7 +27,6 @@ def splitImage(image, prefix, desired_cols):
     if desired_cols * desired_rows > 50:
         raise TooManyPartsError
 
-    print ("A?")
     image = image.resize((new_im_width, new_im_height))
     new_size = (new_im_width, newer_im_height)
     blank = (0, 0, 0, 0)
@@ -73,8 +72,8 @@ def splitImage(image, prefix, desired_cols):
         
         emote_string += "\n"
     
-    print(emote_string)
-    return emote_string
+    print(emote_string.strip())
+    return emote_string.strip()
 
 def trimEmptyBorders(image):
     image = image.convert("RGBA")

@@ -48,6 +48,9 @@ def split():
             raise IncorrectColumnsError
         
         emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
+        window.clipboard_clear()
+        window.clipboard_append(emote_string)
+        window.update()
 
     except IncorrectColumnsError:
         messagebox.showinfo("Error", "The desired amount of columns should be in between 1 and 50.", icon = "warning")
