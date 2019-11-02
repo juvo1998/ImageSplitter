@@ -79,7 +79,7 @@ prefix_label.place(x = 20, y = 100)
 
 # Prefix entry
 prefix_entry = tkinter.Entry(window, width = 46)
-prefix_entry.place(x = 70, y = 98)
+prefix_entry.place(x = 70, y = 100)
 
 # Desired columns label
 des_col_label = tkinter.Label(window, text = "Desired number of columns:")
@@ -87,7 +87,7 @@ des_col_label.place(x = 20, y = 140)
 
 # Desired columns entry
 des_col_entry = tkinter.Entry(window, width = 3)
-des_col_entry.place(x = 204, y = 138)
+des_col_entry.place(x = 204, y = 140)
 
 # Execute
 window.mainloop()

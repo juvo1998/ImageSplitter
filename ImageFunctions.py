@@ -45,28 +45,28 @@ def splitImage(image, prefix, desired_cols):
 
             part = new_canvas.crop((left, top, right, bot))
             
-            if x == 0:
+            if y == 0:
                 suffix_row = "A"
-            elif x == 1:
+            elif y == 1:
                 suffix_row = "B"
-            elif x == 2:
+            elif y == 2:
                 suffix_row = "C"
-            elif x == 3:
+            elif y == 3:
                 suffix_row = "D"
-            elif x == 4:
+            elif y == 4:
                 suffix_row = "E"
-            elif x == 5:
+            elif y == 5:
                 suffix_row = "F"
-            elif x == 6:
+            elif y == 6:
                 suffix_row = "G"
-            elif x == 7:
+            elif y == 7:
                 suffix_row = "H"
-            elif x == 8:
+            elif y == 8:
                 suffix_row = "I"
             else:
                 suffix_row = "RAN_OUT_ROW"
 
-            suffix_col = str(y + 1)
+            suffix_col = str(x + 1)
             emote_string += ":{0}_{1}{2}:".format(prefix, suffix_row, suffix_col)
             part.save("{0}_{1}{2}.png".format(prefix, suffix_row, suffix_col), "PNG")
         
