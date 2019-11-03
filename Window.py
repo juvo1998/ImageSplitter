@@ -2,7 +2,7 @@ import tkinter
 import sys
 import os
 import ImageFunctions as IFun
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, ttk
 from PIL import Image
 
 class Error(Exception):
@@ -31,6 +31,7 @@ window.geometry("400x260")
 selected_image = None
 
 def selectImage():
+    progress["value"] = 0
     global selected_image
     path = filedialog.askopenfilename(parent = window)
     try:
@@ -55,26 +56,33 @@ def selectImage():
     print("Successfully loaded image: {0}".format(path))
 
 def split():
+    progress["value"] = 10
     try:
         desired_cols = int(des_col_entry.get())
         if desired_cols < 1 or desired_cols > 50:
             raise IncorrectColumnsError
         
+        progress["value"] = 20
         emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
         window.clipboard_clear()
         window.clipboard_append(emote_string)
         window.update()
+        progress["value"] = 100
 
     except IncorrectColumnsError:
+        progress["value"] = 0
         messagebox.showinfo("Error", "The desired amount of columns should be in between 1 and 50.", icon = "warning")
 
     except IFun.TooManyPartsError:
+        progress["value"] = 0
         messagebox.showinfo("Error", "The amount of parts exceed 50.", icon = "warning")
 
     except IFun.TooManyRowsError:
+        progress["value"] = 0
         messagebox.showinfo("Error", "There are too many rows given the desired columns.", icon = "warning")
 
     except:
+        progress["value"] = 0
         messagebox.showinfo("Error", "All fields must be completed.", icon = "warning")
 
 # File frame
@@ -120,6 +128,10 @@ split_button.pack(side = "bottom", pady = 10)
 # Copy label
 copy_label = tkinter.Label(window, text = "Note: your clipboard will have the full emote string after splitting.")
 copy_label.pack(side = "bottom")
+
+# Progress bar
+progress = ttk.Progressbar(window, length = 300)
+progress.pack(side = "bottom", pady = 10)
 
 # Execute
 window.mainloop()
