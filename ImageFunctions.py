@@ -7,6 +7,9 @@ class Error(Exception):
 class TooManyPartsError(Error):
     pass
 
+class TooManyRowsError(Error):
+    pass
+
 def splitImage(image, prefix, desired_cols):
     # We are only given desired_cols, as we will calculate the desired_rows based on the aspect ratio.
     image = trimEmptyBorders(image)
@@ -63,8 +66,14 @@ def splitImage(image, prefix, desired_cols):
                 suffix_row = "H"
             elif y == 8:
                 suffix_row = "I"
+            elif y == 9:
+                suffix_row = "J"
+            elif y == 10:
+                suffix_row = "K"
+            elif y == 11:
+                suffix_row = "L"
             else:
-                suffix_row = "RAN_OUT_ROW"
+                raise TooManyRowsError
 
             suffix_col = str(x + 1)
             emote_string += ":{0}_{1}{2}:".format(prefix, suffix_row, suffix_col)

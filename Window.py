@@ -1,4 +1,6 @@
 import tkinter
+import sys
+import os
 import ImageFunctions as IFun
 from tkinter import messagebox, filedialog
 from PIL import Image
@@ -13,6 +15,16 @@ class IncorrectColumnsError(Error):
     pass
 
 window = tkinter.Tk()
+window.title("ImageSplitter")
+
+try:
+    wd = sys._MEIPASS
+except:
+    wd = "."
+yg = os.path.join(wd, "YuiGoggles.ico")
+if "nt" == os.name:
+    window.wm_iconbitmap(bitmap = yg)
+
 window.resizable(False, False)
 window.geometry("480x260")
 
@@ -57,6 +69,9 @@ def split():
 
     except IFun.TooManyPartsError:
         messagebox.showinfo("Error", "The amount of parts exceed 50.", icon = "warning")
+
+    except IFun.TooManyRowsError:
+        messagebox.showinfo("Error", "There are too many rows given the desired columns.", icon = "warning")
 
     except:
         messagebox.showinfo("Error", "All fields must be completed.", icon = "warning")
