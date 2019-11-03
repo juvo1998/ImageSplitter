@@ -26,12 +26,9 @@ if "nt" == os.name:
     window.wm_iconbitmap(bitmap = yg)
 
 window.resizable(False, False)
-window.geometry("480x260")
+window.geometry("400x260")
 
 selected_image = None
-
-def errorCallback():
-    messagebox.showinfo("Error", "The selected file is not an image.", icon = "warning")
 
 def selectImage():
     global selected_image
@@ -45,8 +42,12 @@ def selectImage():
     except ImageTooSmallError:
         messagebox.showinfo("Error", "The image selected is too small.", icon = "warning")
 
+    except AttributeError:
+        # User clicked cancel
+        return
+
     except:
-        messagebox.showinfo("Error", "The selected file is not an image.", icon = "warning")
+        messagebox.showinfo("Error", "The selected file is not an image, or the image type is not supported.", icon = "warning")
         return
 
     selected_image = image
@@ -76,33 +77,49 @@ def split():
     except:
         messagebox.showinfo("Error", "All fields must be completed.", icon = "warning")
 
-# Select file button
-select_file_button = tkinter.Button(window, text = "Select image...", command = selectImage)
-select_file_button.place(x = 16, y = 20)
+# File frame
+file_frame = tkinter.Frame(window)
+file_frame.pack(pady = (20, 10))
 
-# Split execution button
-split_button = tkinter.Button(window, text = "Split!", command = split)
-split_button.place(x = 210, y = 200)
+# Select file button
+select_file_button = tkinter.Button(file_frame, text = "Select image...", command = selectImage)
+select_file_button.pack(side = "left")
 
 # Image path label
-path_label = tkinter.Label(window, text = "No image selected.", wraplength = 420)
-path_label.place(x = 20, y = 50)
+path_label = tkinter.Label(file_frame, text = "No image selected.", wraplength = 420)
+path_label.pack(side = "left")
+
+# Prefix frame
+prefix_frame = tkinter.Frame(window)
+prefix_frame.pack(pady = 10)
 
 # Prefix label
-prefix_label = tkinter.Label(window, text = "Prefix:")
-prefix_label.place(x = 20, y = 100)
+prefix_label = tkinter.Label(prefix_frame, text = "Prefix:")
+prefix_label.pack(side = "left")
 
 # Prefix entry
-prefix_entry = tkinter.Entry(window, width = 46)
-prefix_entry.place(x = 70, y = 100)
+prefix_entry = tkinter.Entry(prefix_frame, width = 46)
+prefix_entry.pack(side = "left")
+
+# Desired columns frame
+des_col_frame = tkinter.Frame(window)
+des_col_frame.pack(pady = 10)
 
 # Desired columns label
-des_col_label = tkinter.Label(window, text = "Desired number of columns:")
-des_col_label.place(x = 20, y = 140)
+des_col_label = tkinter.Label(des_col_frame, text = "Desired number of columns:")
+des_col_label.pack(side = "left")
 
 # Desired columns entry
-des_col_entry = tkinter.Entry(window, width = 3)
-des_col_entry.place(x = 204, y = 140)
+des_col_entry = tkinter.Entry(des_col_frame, width = 3)
+des_col_entry.pack(side = "left")
+
+# Split execution button
+split_button = tkinter.Button(window, text = "Split!", command = split, height = 2, width = 10)
+split_button.pack(side = "bottom", pady = 10)
+
+# Copy label
+copy_label = tkinter.Label(window, text = "Note: your clipboard will have the full emote string after splitting.")
+copy_label.pack(side = "bottom")
 
 # Execute
 window.mainloop()
