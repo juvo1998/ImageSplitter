@@ -121,18 +121,26 @@ def trimEmptyBorders(image):
     return trimmed
 
 def splitGif(gif, prefix, desired_cols):
-    # print(gif.n_frames)
-    # gif.seek(gif.n_frames - 1)
-    # gif.save("last_frame.png", "PNG")
     images = []
-    # reverse for testing
     num_frames = gif.n_frames
-    print(num_frames)
-    for n in range(num_frames - 1, -1, -1):
-        print("looking at frame: {0}".format(n))
-        gif.seek(n)
-        frame = gif.copy()
-        frame.convert("RGBA")
-        images.append(frame)
     
-    images[0].save("out_gif.gif", format = "GIF", save_all = True, append_images = images[1:])
+    for n in range(num_frames - 1, -1, -1):
+        gif.seek(n)
+        frame = gif.convert("RGBA").copy() # Should be in RGBA, but we'll see
+
+        alpha = frame.getchannel('A')
+
+        # Convert the image into P mode but only use 255 colors in the palette out of 256
+        frame = frame.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+
+        # Set all pixel values below 128 to 255 , and the rest to 0
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+
+        # Paste the color of index 255 and use alpha as a mask
+        frame.paste(255, mask)
+
+        # The transparency index is 255
+        frame.info['transparency'] = 255
+        images.append(frame)
+
+    images[0].save("out.gif", save_all = True, append_images = images[1:], loop = 0, disposal = 2)
