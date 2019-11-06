@@ -119,3 +119,18 @@ def trimEmptyBorders(image):
 
     trimmed = image.crop((desired_left_x, desired_top_y, desired_right_x + 1, desired_bot_y + 1))
     return trimmed
+
+def splitGif(gif, prefix, desired_cols):
+    # print(gif.n_frames)
+    # gif.seek(gif.n_frames - 1)
+    # gif.save("last_frame.png", "PNG")
+    images = []
+    # reverse for testing
+    num_frames = gif.n_frames
+    for n in range(num_frames - 1, -1, 1):
+        gif.seek(n)
+        frame = gif.copy()
+        frame.convert("RGBA")
+        images.append(frame)
+    
+    images.save("out_gif", save_all = True, append_images = images)

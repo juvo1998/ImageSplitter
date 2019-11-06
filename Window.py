@@ -26,12 +26,11 @@ if "nt" == os.name:
     window.wm_iconbitmap(bitmap = yg)
 
 window.resizable(False, False)
-window.geometry("400x260")
+window.geometry("500x420")
 
 selected_image = None
 
 def selectImage():
-    progress["value"] = 0
     global selected_image
     path = filedialog.askopenfilename(parent = window)
     try:
@@ -56,34 +55,28 @@ def selectImage():
     print("Successfully loaded image: {0}".format(path))
 
 def split():
-    progress["value"] = 10
     try:
         desired_cols = int(des_col_entry.get())
         if desired_cols < 1 or desired_cols > 50:
             raise IncorrectColumnsError
         
-        progress["value"] = 20
-        emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
-        window.clipboard_clear()
-        window.clipboard_append(emote_string)
-        window.update()
-        progress["value"] = 100
+        IFun.splitGif(selected_image, prefix_entry.get(), desired_cols)
+        # emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
+        # window.clipboard_clear()
+        # window.clipboard_append(emote_string)
+        # window.update()
 
     except IncorrectColumnsError:
-        progress["value"] = 0
         messagebox.showinfo("Error", "The desired amount of columns should be in between 1 and 50.", icon = "warning")
 
     except IFun.TooManyPartsError:
-        progress["value"] = 0
         messagebox.showinfo("Error", "The amount of parts exceed 50.", icon = "warning")
 
     except IFun.TooManyRowsError:
-        progress["value"] = 0
         messagebox.showinfo("Error", "There are too many rows given the desired columns.", icon = "warning")
 
-    except:
-        progress["value"] = 0
-        messagebox.showinfo("Error", "All fields must be completed.", icon = "warning")
+    # except:
+    #     messagebox.showinfo("Error", "All fields must be completed.", icon = "warning")
 
 # File frame
 file_frame = tkinter.Frame(window)
