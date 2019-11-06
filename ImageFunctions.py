@@ -127,10 +127,12 @@ def splitGif(gif, prefix, desired_cols):
     images = []
     # reverse for testing
     num_frames = gif.n_frames
-    for n in range(num_frames - 1, -1, 1):
+    print(num_frames)
+    for n in range(num_frames - 1, -1, -1):
+        print("looking at frame: {0}".format(n))
         gif.seek(n)
         frame = gif.copy()
         frame.convert("RGBA")
         images.append(frame)
     
-    images.save("out_gif", save_all = True, append_images = images)
+    images[0].save("out_gif.gif", format = "GIF", save_all = True, append_images = images[1:])
