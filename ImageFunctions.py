@@ -120,10 +120,10 @@ def trimEmptyBorders(image):
     trimmed = image.crop((desired_left_x, desired_top_y, desired_right_x + 1, desired_bot_y + 1))
     return trimmed
 
-def splitGif(gif, prefix, desired_cols):
+def reverseGif(gif, prefix, desired_cols):
     images = []
     num_frames = gif.n_frames
-    
+
     for n in range(num_frames - 1, -1, -1):
         gif.seek(n)
         frame = gif.convert("RGBA").copy() # Should be in RGBA, but we'll see
@@ -144,3 +144,101 @@ def splitGif(gif, prefix, desired_cols):
         images.append(frame)
 
     images[0].save("out.gif", save_all = True, append_images = images[1:], loop = 0, disposal = 2)
+
+def splitGif(gif, prefix, desired_cols):
+    # We are only given desired_cols, as we will calculate the desired_rows based on the aspect ratio.
+    im_width, im_height = gif.size
+    print("Image has width = {0}, and height = {1}".format(im_width, im_height))
+    part_width = int(im_width // desired_cols)
+    print("Each part has width = {0}".format(part_width))
+    new_im_width = part_width * desired_cols
+    print("The new im_width = {0}".format(new_im_width))
+    reduce_ratio = im_width / new_im_width
+    new_im_height = round(im_height / reduce_ratio)
+    print("The new im_height = {0}".format(new_im_height))
+    desired_rows = math.ceil(new_im_height / part_width)
+    newer_im_height = part_width * desired_rows
+    print("The even newer im_height = {0}".format(newer_im_height))
+
+    # Because Discord only allows 50 emotes per server, limit parts <= 50
+    if desired_cols * desired_rows > 50:
+        raise TooManyPartsError
+
+    # Iterate through frames and alter the canvas / image sizes
+    num_frames = gif.n_frames
+    frames = []
+    for frame_num in range(num_frames):
+        gif.seek(frame_num)
+
+        # Resize and expand canvas
+        image = gif.convert("RGBA").copy()
+        image = image.resize((new_im_width, new_im_height))
+        new_size = (new_im_width, newer_im_height)
+        blank = (0, 0, 0, 0)
+        new_canvas = Image.new("RGBA", new_size, blank)
+        new_canvas.paste(image)
+        frames.append(new_canvas)
+
+    emote_string = ""
+    # Begin the crops / splits
+    for y in range(desired_rows):
+        for x in range(desired_cols):
+            final_frames = []
+            for frame in frames:
+                left = x * part_width
+                top = y * part_width
+                right = left + part_width
+                bot = top + part_width
+
+                part = frame.crop((left, top, right, bot))
+
+                # Convert to fix transparency issue
+                alpha = part.getchannel('A')
+
+                # Convert the image into P mode but only use 255 colors in the palette out of 256
+                part = part.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+
+                # Set all pixel values below 128 to 255 , and the rest to 0
+                mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+
+                # Paste the color of index 255 and use alpha as a mask
+                part.paste(255, mask)
+
+                # The transparency index is 255
+                part.info['transparency'] = 255
+                final_frames.append(part)
+            
+            if y == 0:
+                suffix_row = "A"
+            elif y == 1:
+                suffix_row = "B"
+            elif y == 2:
+                suffix_row = "C"
+            elif y == 3:
+                suffix_row = "D"
+            elif y == 4:
+                suffix_row = "E"
+            elif y == 5:
+                suffix_row = "F"
+            elif y == 6:
+                suffix_row = "G"
+            elif y == 7:
+                suffix_row = "H"
+            elif y == 8:
+                suffix_row = "I"
+            elif y == 9:
+                suffix_row = "J"
+            elif y == 10:
+                suffix_row = "K"
+            elif y == 11:
+                suffix_row = "L"
+            else:
+                raise TooManyRowsError
+
+            suffix_col = str(x + 1)
+            emote_string += ":{0}_{1}{2}:".format(prefix, suffix_row, suffix_col)
+            part.save("{0}_{1}{2}.gif".format(prefix, suffix_row, suffix_col), save_all = True, append_images = final_frames[1:], loop = 0, disposal = 2)
+
+    return emote_string
+
+    
