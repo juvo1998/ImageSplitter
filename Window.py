@@ -60,11 +60,12 @@ def split():
         if desired_cols < 1 or desired_cols > 50:
             raise IncorrectColumnsError
         
-        IFun.splitGif(selected_image, prefix_entry.get(), desired_cols)
-        emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
-        window.clipboard_clear()
-        window.clipboard_append(emote_string)
-        window.update()
+        # IFun.reverseGif(selected_image, prefix_entry.get(), desired_cols)
+        emote_string = IFun.splitGif(selected_image, prefix_entry.get(), desired_cols)
+        # emote_string = IFun.splitImage(selected_image, prefix_entry.get(), desired_cols)
+        # window.clipboard_clear()
+        # window.clipboard_append(emote_string)
+        # window.update()
 
     except IncorrectColumnsError:
         messagebox.showinfo("Error", "The desired amount of columns should be in between 1 and 50.", icon = "warning")

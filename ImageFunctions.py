@@ -14,17 +14,12 @@ def splitImage(image, prefix, desired_cols):
     # We are only given desired_cols, as we will calculate the desired_rows based on the aspect ratio.
     image = trimEmptyBorders(image)
     im_width, im_height = image.size
-    print("Image has width = {0}, and height = {1}".format(im_width, im_height))
     part_width = int(im_width // desired_cols)
-    print("Each part has width = {0}".format(part_width))
     new_im_width = part_width * desired_cols
-    print("The new im_width = {0}".format(new_im_width))
     reduce_ratio = im_width / new_im_width
     new_im_height = round(im_height / reduce_ratio)
-    print("The new im_height = {0}".format(new_im_height))
     desired_rows = math.ceil(new_im_height / part_width)
     newer_im_height = part_width * desired_rows
-    print("The even newer im_height = {0}".format(newer_im_height))
 
     # Because Discord only allows 50 emotes per server, limit parts <= 50
     if desired_cols * desired_rows > 50:
@@ -127,38 +122,20 @@ def reverseGif(gif, prefix, desired_cols):
     for n in range(num_frames - 1, -1, -1):
         gif.seek(n)
         frame = gif.convert("RGBA").copy() # Should be in RGBA, but we'll see
-
-        alpha = frame.getchannel('A')
-
-        # Convert the image into P mode but only use 255 colors in the palette out of 256
-        frame = frame.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
-
-        # Set all pixel values below 128 to 255 , and the rest to 0
-        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
-
-        # Paste the color of index 255 and use alpha as a mask
-        frame.paste(255, mask)
-
-        # The transparency index is 255
-        frame.info['transparency'] = 255
+        frame = getFixedTransparency(frame)
         images.append(frame)
 
-    images[0].save("out.gif", save_all = True, append_images = images[1:], loop = 0, disposal = 2)
+    images[0].save("reverse.gif", save_all = True, append_images = images[1:], loop = 0, disposal = 2)
 
 def splitGif(gif, prefix, desired_cols):
     # We are only given desired_cols, as we will calculate the desired_rows based on the aspect ratio.
     im_width, im_height = gif.size
-    print("Image has width = {0}, and height = {1}".format(im_width, im_height))
     part_width = int(im_width // desired_cols)
-    print("Each part has width = {0}".format(part_width))
     new_im_width = part_width * desired_cols
-    print("The new im_width = {0}".format(new_im_width))
     reduce_ratio = im_width / new_im_width
     new_im_height = round(im_height / reduce_ratio)
-    print("The new im_height = {0}".format(new_im_height))
     desired_rows = math.ceil(new_im_height / part_width)
     newer_im_height = part_width * desired_rows
-    print("The even newer im_height = {0}".format(newer_im_height))
 
     # Because Discord only allows 50 emotes per server, limit parts <= 50
     if desired_cols * desired_rows > 50:
@@ -177,6 +154,7 @@ def splitGif(gif, prefix, desired_cols):
         blank = (0, 0, 0, 0)
         new_canvas = Image.new("RGBA", new_size, blank)
         new_canvas.paste(image)
+
         frames.append(new_canvas)
 
     emote_string = ""
@@ -190,22 +168,10 @@ def splitGif(gif, prefix, desired_cols):
                 right = left + part_width
                 bot = top + part_width
 
+                # Issue doc: when here, part still has transparency when saved as png.
+                # The issue occurs when cropping: part loses transparency...
                 part = frame.crop((left, top, right, bot))
-
-                # Convert to fix transparency issue
-                alpha = part.getchannel('A')
-
-                # Convert the image into P mode but only use 255 colors in the palette out of 256
-                part = part.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
-
-                # Set all pixel values below 128 to 255 , and the rest to 0
-                mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
-
-                # Paste the color of index 255 and use alpha as a mask
-                part.paste(255, mask)
-
-                # The transparency index is 255
-                part.info['transparency'] = 255
+                # part = getFixedTransparency(part)
                 final_frames.append(part)
             
             if y == 0:
@@ -237,8 +203,25 @@ def splitGif(gif, prefix, desired_cols):
 
             suffix_col = str(x + 1)
             emote_string += ":{0}_{1}{2}:".format(prefix, suffix_row, suffix_col)
-            part.save("{0}_{1}{2}.gif".format(prefix, suffix_row, suffix_col), save_all = True, append_images = final_frames[1:], loop = 0, disposal = 2)
+            final_frames[0].save("{0}_{1}{2}.gif".format(prefix, suffix_row, suffix_col), save_all = True, append_images = final_frames[1:], loop = 0, disposal = 2)
 
     return emote_string
+
+def getFixedTransparency(image):
+    alpha = image.getchannel('A')
+
+    # Convert the image into P mode but only use 255 colors in the palette out of 256
+    image = image.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+
+    # Set all pixel values below 128 to 255 , and the rest to 0
+    mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+
+    # Paste the color of index 255 and use alpha as a mask
+    image.paste(255, mask)
+
+    # The transparency index is 255
+    image.info['transparency'] = 255
+
+    return image
 
     
